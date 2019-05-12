@@ -6,7 +6,7 @@ type Car struct {
 	Time int
 	EnterRoad int
 	OutRoad int
-	iterations int
+	Iterations int
 }
 
 func NewCar(time, enterRoad, outRoad int) Car {
@@ -21,7 +21,7 @@ func NewCar(time, enterRoad, outRoad int) Car {
 }
 
 func(c *Car) Next() bool {
-	if c.iterations % c.Time == 0 {
+	if c.Iterations % c.Time == 0 {
 		logrus.Info("next true")
 		return true
 	}
@@ -29,9 +29,9 @@ func(c *Car) Next() bool {
 }
 
 func (c *Car) Terminate() bool {
-	c.iterations = c.iterations - 1
+	c.Iterations = c.Iterations - 1
 
-	if c.iterations == 0 {
+	if c.Iterations == 0 {
 		logrus.WithField("car", *c).Info("car teminated")
 		return true
 	}

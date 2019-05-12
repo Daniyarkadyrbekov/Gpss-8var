@@ -25,3 +25,8 @@ func timeGenerator() int {
 func exponentialRandomNumber() int {
 	return 0
 }
+
+func u01() float64{
+	rand.Seed(time.Now().UnixNano())
+	return rand.Float64()
+}
