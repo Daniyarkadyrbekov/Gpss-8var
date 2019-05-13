@@ -4,25 +4,23 @@ import (
 	"./generator"
 	"./model"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 var Cars = []model.Car{}
 
 func main() {
 	carGeneratorChan := make(chan model.Car)
-	go generator.CarGenerator(carGeneratorChan)
+	tickChan := make(chan struct{})
+	timeoutChan := make(chan struct{})
+	go generator.CarGenerator(carGeneratorChan, tickChan,timeoutChan)
 
-	ticker := time.NewTicker(time.Millisecond)
-	timer := time.NewTimer(3600 * time.Millisecond)
 	circle := model.NewCircle()
 LOOP:
 	for {
 		select {
-		case <-ticker.C:
+		case <-tickChan:
 			circle.Next()
-		case <-timer.C:
-			ticker.Stop()
+		case <-timeoutChan:
 			//fmt.Printf("end ticker\n")
 			break LOOP
 		case car := <-carGeneratorChan:
