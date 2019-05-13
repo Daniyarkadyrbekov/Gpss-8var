@@ -10,26 +10,54 @@ import (
 const expCarGenerator = 1250
 
 func CarGenerator(addCar chan<- model.Car, tick, timer chan<- struct{}) model.Car {
-	ticker := time.NewTicker(expCarGenerator * time.Microsecond)
-	tickerSec := time.NewTicker(time.Millisecond)
-	timeOut := time.NewTimer(3600 * time.Millisecond)
+	//ticker := time.NewTicker(expCarGenerator * time.Microsecond)
+	//tickerSec := time.NewTicker(time.Millisecond)
+	//timeOut := time.NewTimer(3600 * time.Millisecond)
+	//
+	//for {
+	//	select {
+	//	case <-ticker.C:
+	//		addCar <- model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
+	//	case <-tickerSec.C:
+	//		tick <- struct{}{}
+	//	case <-timeOut.C:
+	//		timer <- struct{}{}
+	//	}
+	//}
+	var addTime = .0
+	var addTimes []float64
 
+	for addTime <= 3600 {
+		addTime += exponensialCarGenerator()
+		addTimes = append(addTimes, addTime)
+	}
+	//logrus.WithField("addtimes", addTimes[:10]).Info("addTimes Generated")
+
+	var timeNow = 0
 	for {
-		select {
-		case <-ticker.C:
-			addCar <- model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
-		case <-tickerSec.C:
-			tick <- struct{}{}
-		case <-timeOut.C:
+		if timeNow > 3600 {
 			timer <- struct{}{}
 		}
+		if len(addTimes) > 0{
+			for int(addTimes[0]) <= timeNow {
+				addCar<-model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
+				if len(addTimes) > 2 {
+					addTimes = addTimes[1:]
+				}else{
+					addTimes = []float64{}
+					break
+				}
+			}
+		}
+		tick<- struct{}{}
+		timeNow++
 	}
 }
 
-func exponensialCarGenerator() time.Duration {
+func exponensialCarGenerator() float64 {
 	var gen float64
-	gen = -math.Log(u01()) * 1250
-	return time.Duration(gen)
+	gen = -math.Log(u01()) * 1.25
+	return gen
 }
 
 func timeGenerator() int {
