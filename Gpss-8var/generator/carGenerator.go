@@ -1,29 +1,42 @@
 package generator
 
 import (
-	"math/rand"
 	"../model"
+	"math"
+	"math/rand"
 	"time"
 )
-
+const expCarGenerator = 1250
 
 func CarGenerator(out chan<- model.Car) model.Car {
-	ticker := time.NewTicker(833 * time.Microsecond)
+	ticker := time.NewTicker(expCarGenerator * time.Microsecond)
 
 	for{
 		select {
 		case <-ticker.C:
-			out <- model.NewCar(int(rand.ExpFloat64()) % 3 + 4,int(rand.ExpFloat64()) % 5,int(rand.ExpFloat64()) % 5)
+			out <- model.NewCar(timeGenerator(),roadGenerator(),roadGenerator())
 		}
 	}
 }
 
-func timeGenerator() int {
-	return int(rand.ExpFloat64()) % 3 + 4
+func exponensialCarGenerator() time.Duration {
+	var gen float64
+	gen = -math.Log(u01())  * 1250
+	return time.Duration(gen)
 }
 
-func exponentialRandomNumber() int {
-	return 0
+func timeGenerator() int {
+	var time float64
+	time = -math.Log(u01())  * 30
+	if time < 20{
+		time = 20
+	}
+	return int(time) / 5
+}
+
+func roadGenerator() int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Int() % 5
 }
 
 func u01() float64{

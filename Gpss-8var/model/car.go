@@ -1,6 +1,6 @@
 package model
 
-import "github.com/sirupsen/logrus"
+var CarTerminated = 0
 
 type Car struct {
 	Time int
@@ -22,7 +22,7 @@ func NewCar(time, enterRoad, outRoad int) Car {
 
 func(c *Car) Next() bool {
 	if c.Iterations % c.Time == 0 {
-		logrus.Info("next true")
+		//logrus.Info("next true")
 		return true
 	}
 	return false
@@ -32,7 +32,8 @@ func (c *Car) Terminate() bool {
 	c.Iterations = c.Iterations - 1
 
 	if c.Iterations == 0 {
-		logrus.WithField("car", *c).Info("car teminated")
+		//logrus.WithField("car", *c).Info("car teminated")
+		CarTerminated++
 		return true
 	}
 	return false
