@@ -13,7 +13,7 @@ func(c *Circle) Add(car Car){
 	c.Roads[car.EnterRoad] = append(c.Roads[car.EnterRoad], car)
 }
 
-func(c *Circle) Next() {
+func(c *Circle) Next(delta DeltaType) {
 	for i := roadsNumber - 1; i >= 0; i--{
 		var roadIsEmpty =  true
 		for j := 0; j < len(c.Circle[i]); j++{
@@ -44,6 +44,7 @@ func(c *Circle) Next() {
 		}
 		AvgQueue += len(c.Roads[i])
 	}
+	c.Add(delta.DeltaCar)
 }
 
 func NewCircle() Circle{

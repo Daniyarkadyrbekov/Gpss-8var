@@ -1,5 +1,10 @@
 package model
 
+type DeltaType struct {
+	DeltaCar Car
+	DeltaTime float64
+}
+
 var CarTerminated = 0
 
 type Car struct {

@@ -5,58 +5,48 @@ import (
 	"math"
 	"math/rand"
 	"time"
+	"github.com/sirupsen/logrus"
 )
 
 const expCarGenerator = 1250
 
-func CarGenerator(addCar chan<- model.Car, tick, timer chan<- struct{}) model.Car {
-	//ticker := time.NewTicker(expCarGenerator * time.Microsecond)
-	//tickerSec := time.NewTicker(time.Millisecond)
-	//timeOut := time.NewTimer(3600 * time.Millisecond)
+func CarGenerator( tick chan<- model.DeltaType, timer chan<- struct{}) {
+	//var addTime = .0
+	//var addTimes []float64
 	//
-	//for {
-	//	select {
-	//	case <-ticker.C:
-	//		addCar <- model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
-	//	case <-tickerSec.C:
-	//		tick <- struct{}{}
-	//	case <-timeOut.C:
-	//		timer <- struct{}{}
-	//	}
+	//for addTime <= 3600 {
+	//	addTime += exponensialCarGenerator()
+	//	addTimes = append(addTimes, addTime)
 	//}
-	var addTime = .0
-	var addTimes []float64
-
-	for addTime <= 3600 {
-		addTime += exponensialCarGenerator()
-		addTimes = append(addTimes, addTime)
-	}
 	//logrus.WithField("addtimes", addTimes[:10]).Info("addTimes Generated")
 
-	var timeNow = 0
+	var timeNow = .0
 	for {
+		deltaTime := exponensialCarGenerator()
+		timeNow += deltaTime
 		if timeNow > 3600 {
 			timer <- struct{}{}
+			break
 		}
-		if len(addTimes) > 0{
-			for int(addTimes[0]) <= timeNow {
-				addCar<-model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
-				if len(addTimes) > 2 {
-					addTimes = addTimes[1:]
-				}else{
-					addTimes = []float64{}
-					break
-				}
-			}
-		}
-		tick<- struct{}{}
-		timeNow++
+		//if len(addTimes) > 0{
+		//	for int(addTimes[0]) <= timeNow {
+		//		addCar<-model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
+		//		if len(addTimes) > 2 {
+		//			addTimes = addTimes[1:]
+		//		}else{
+		//			addTimes = []float64{}
+		//			break
+		//		}
+		//	}
+		//}
+		logrus.WithField("deltaTime", deltaTime).Info("deltaTimeGenerated Generated")
+		tick <- model.DeltaType{model.NewCar(timeGenerator(), roadGenerator(), roadGenerator()), deltaTime}
 	}
 }
 
 func exponensialCarGenerator() float64 {
 	var gen float64
-	gen = -math.Log(u01()) * 1.25
+	gen = -math.Log(u01()) * 1.3
 	return gen
 }
 
