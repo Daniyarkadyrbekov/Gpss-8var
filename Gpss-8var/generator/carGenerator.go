@@ -10,15 +10,9 @@ import (
 
 const expCarGenerator = 1250
 
+var CarGenerated = 0
+
 func CarGenerator( tick chan<- model.DeltaType, timer chan<- struct{}) {
-	//var addTime = .0
-	//var addTimes []float64
-	//
-	//for addTime <= 3600 {
-	//	addTime += exponensialCarGenerator()
-	//	addTimes = append(addTimes, addTime)
-	//}
-	//logrus.WithField("addtimes", addTimes[:10]).Info("addTimes Generated")
 
 	var timeNow = .0
 	for {
@@ -28,18 +22,8 @@ func CarGenerator( tick chan<- model.DeltaType, timer chan<- struct{}) {
 			timer <- struct{}{}
 			break
 		}
-		//if len(addTimes) > 0{
-		//	for int(addTimes[0]) <= timeNow {
-		//		addCar<-model.NewCar(timeGenerator(), roadGenerator(), roadGenerator())
-		//		if len(addTimes) > 2 {
-		//			addTimes = addTimes[1:]
-		//		}else{
-		//			addTimes = []float64{}
-		//			break
-		//		}
-		//	}
-		//}
 		logrus.WithField("deltaTime", deltaTime).Info("deltaTimeGenerated Generated")
+		CarGenerated++
 		tick <- model.DeltaType{model.NewCar(timeGenerator(), roadGenerator(), roadGenerator()), deltaTime}
 	}
 }

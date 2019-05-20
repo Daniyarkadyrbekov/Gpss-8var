@@ -23,14 +23,15 @@ LOOP:
 		case <-timeoutChan:
 			//fmt.Printf("end ticker\n")
 			break LOOP
-		//case car := <-carGeneratorChan:
-		//	circle.Add(car)
 		}
 	}
 	logrus.WithFields(logrus.Fields{
-		"Пропускная способность": float64(model.CarTerminated) / 3600.,
+		"Пропускная способность": float64(model.CarTerminated),
 	}).Info("Вывод")
 	logrus.WithFields(logrus.Fields{
-		"Средняя длин очереди": float64(model.AvgQueue) / 3600.,
+		"Средняя длина очереди": float64(model.AvgQueue),
+	}).Info("Вывод")
+	logrus.WithFields(logrus.Fields{
+		"сгенерированно машин": generator.CarGenerated,
 	}).Info("Вывод")
 }
