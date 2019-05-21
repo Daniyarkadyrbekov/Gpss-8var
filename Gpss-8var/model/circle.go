@@ -47,15 +47,38 @@ func(c *Circle) Next(delta DeltaType) {
 	timeFixed := false
 	for !timeFixed{
 		timeFixed = true
-		for _, Cars := range c.Roads{
+		for i, Cars := range c.Roads{
 			j := carNeedToGo(Cars)
 			if j == -1{
 				continue
 			}
-
+			c.Move(i, j)
+		}
+		for _, Cars := range c.Roads{
+			for _, car := range Cars {
+				if car.TimeFixed < delta.DeltaTime {
+					timeFixed = false
+				}
+			}
 		}
 	}
 	c.Add(delta.DeltaCar)
+}
+
+var CarTerminated = 0
+
+func (c *Circle) Move(i, j int) {
+	MoveTime := c.Roads[i][j].TimeForPart
+	for k, _ := range c.Roads[i] {
+		c.Roads[i][k].Move(MoveTime)
+	}
+	car := c.Roads[i][j]
+	if c.Roads[i][j].AllTime > 0 {
+		c.Roads[(i + 1) % roadsNumber] = append(c.Roads[(i + 1) % roadsNumber], car)
+	}else{
+		CarTerminated++
+	}
+	c.Roads[i] = append(c.Roads[i][:j], c.Roads[i][j+1:]...)
 }
 
 func carNeedToGo(Cars []Car) int{

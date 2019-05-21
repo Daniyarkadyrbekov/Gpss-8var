@@ -5,8 +5,6 @@ type DeltaType struct {
 	DeltaTime float64
 }
 
-var CarTerminated = 0
-
 type Car struct {
 	TimeForPart float64
 	AllTime float64
@@ -17,7 +15,7 @@ type Car struct {
 	outRoad int
 }
 
-func NewCar(time float64, enterRoad, outRoad int) Car {
+func NewCar(timeForPart float64, enterRoad, outRoad int) Car {
 	var roadsNum int
 	if outRoad > enterRoad {
 		roadsNum = outRoad - enterRoad
@@ -25,7 +23,7 @@ func NewCar(time float64, enterRoad, outRoad int) Car {
 		roadsNum = outRoad + roadsNumber - enterRoad
 	}
 
-	return Car{time, float64(roadsNum) * time,.0, .0, false, enterRoad, outRoad}
+	return Car{timeForPart, float64(roadsNum) * timeForPart,timeForPart, .0, false, enterRoad, outRoad}
 }
 
 func(c *Car) Move(moveTime float64) {
