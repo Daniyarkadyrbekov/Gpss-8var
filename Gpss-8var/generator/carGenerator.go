@@ -34,13 +34,13 @@ func exponensialCarGenerator() float64 {
 	return gen
 }
 
-func timeGenerator() int {
+func timeGenerator() float64 {
 	var time float64
 	time = -math.Log(u01()) * 30
 	if time < 20 {
 		time = 20
 	}
-	return int(time) / 5
+	return time / 5
 }
 
 func roadGenerator() int {
