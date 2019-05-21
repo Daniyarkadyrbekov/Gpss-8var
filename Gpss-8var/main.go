@@ -26,12 +26,12 @@ LOOP:
 		}
 	}
 	logrus.WithFields(logrus.Fields{
-		"Пропускная способность": float64(model.CarTerminated),
+		"Пропускная способность": float64(model.CarTerminated) / 3600,
 	}).Info("Вывод")
 	logrus.WithFields(logrus.Fields{
-		"Средняя длина очереди": float64(model.AvgQueue),
+		"Средняя длина очереди": float64(model.AvgQueue) / 3600,
 	}).Info("Вывод")
-	logrus.WithFields(logrus.Fields{
-		"сгенерированно машин": generator.CarGenerated,
-	}).Info("Вывод")
+	//logrus.WithFields(logrus.Fields{
+	//	//	"сгенерированно машин": generator.CarGenerated,
+	//	//}).Info("Вывод")
 }

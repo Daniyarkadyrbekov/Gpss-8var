@@ -5,7 +5,6 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"github.com/sirupsen/logrus"
 )
 
 const expCarGenerator = 1250
@@ -18,11 +17,12 @@ func CarGenerator( tick chan<- model.DeltaType, timer chan<- struct{}) {
 	for {
 		deltaTime := exponensialCarGenerator()
 		timeNow += deltaTime
-		if timeNow > 3600 {
+		if timeNow > 360 {
 			timer <- struct{}{}
 			break
 		}
-		logrus.WithField("deltaTime", deltaTime).Info("deltaTimeGenerated Generated")
+
+		//logrus.WithField("deltaTime", deltaTime).Info("deltaTimeGenerated Generated")
 		CarGenerated++
 		tick <- model.DeltaType{model.NewCar(timeGenerator(), roadGenerator(), roadGenerator()), deltaTime}
 	}

@@ -1,6 +1,8 @@
 package model
 
-var AvgQueue = 0
+import "github.com/sirupsen/logrus"
+
+var AvgQueue = .0
 
 const roadsNumber = 5
 
@@ -44,6 +46,9 @@ func(c *Circle) Next(delta DeltaType) {
 	//	}
 	//	AvgQueue += len(c.Roads[i])
 	//}
+	logrus.WithField("ЦТС", c.Roads).Info("ЦТС")
+	logrus.WithField("ЦБС CAR", delta.DeltaCar).Info("ЦБС")
+	logrus.WithField("ЦБС Delta", delta.DeltaTime).Info("ЦБС")
 	timeFixed := false
 	for !timeFixed{
 		timeFixed = true
@@ -62,6 +67,11 @@ func(c *Circle) Next(delta DeltaType) {
 			}
 		}
 	}
+	carCount := 0
+	for _, cars := range c.Roads{
+		carCount += len(cars)
+	}
+	AvgQueue += float64(carCount) / delta.DeltaTime
 	c.Add(delta.DeltaCar)
 }
 
