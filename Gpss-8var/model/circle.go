@@ -1,9 +1,8 @@
 package model
 
 import (
-	"math"
-	"fmt"
 	"../generator"
+	"math"
 )
 
 var AvgQueue = .0
@@ -28,12 +27,12 @@ func(c *Circle) Next() {
 	lastGeneratedTime := generator.ExponensialCarGenerator()
 	deltaType := DeltaType{NewCar(generator.TimeGenerator(), generator.RoadGenerator(), generator.RoadGenerator()), timeNow}
 	c.Add(deltaType)
-	for timeNow < 36.0 {
+	for timeNow < 3600.0 {
 		if timeNow >= lastGeneratedTime {
 			lastGeneratedTime += generator.ExponensialCarGenerator()
-			//CarGenerated++
-			//deltaType := DeltaType{NewCar(generator.TimeGenerator(), generator.RoadGenerator(), generator.RoadGenerator()), timeNow}
-			//c.Add(deltaType)
+			CarGenerated++
+			deltaType := DeltaType{NewCar(generator.TimeGenerator(), generator.RoadGenerator(), generator.RoadGenerator()), timeNow}
+			c.Add(deltaType)
 		}
 		minEvents, minTime := c.futureEvents.getMinTime()
 		if minTime  != math.MaxFloat64{
@@ -46,19 +45,20 @@ func(c *Circle) Next() {
 }
 
 func (c *Circle) processCurrentEvents() {
-	fmt.Printf("timeNow = %v\n", timeNow)
-	fmt.Printf("roadIsFree = %v\n", c.roadIsFree)
-	fmt.Printf("futureEvents = %v\n", c.futureEvents)
-	fmt.Printf("CurrentEvents = %v\n", c.currentEvents)
+	//fmt.Printf("timeNow = %v\n", timeNow)
+	//fmt.Printf("roadIsFree = %v\n", c.roadIsFree)
+	//fmt.Printf("futureEvents = %v\n", c.futureEvents)
+	//fmt.Printf("CurrentEvents = %v\n\n", c.currentEvents)
 	c.freeRoads()
 	c.processInCircle()
+	//c.processInRoad()
 }
 
 func (c *Circle) freeRoads() {
-	for i, event := range c.currentEvents{
-		if event.typeIsFreeRoad{
-			fmt.Printf("free Road %v\n", event.freeRoad)
-			c.roadIsFree[event.freeRoad] = true
+	for i := 0; i < len(c.currentEvents); i++{
+		if c.currentEvents[i].typeIsFreeRoad{
+			//fmt.Printf("free Road %v\n", c.currentEvents[i].freeRoad)
+			c.roadIsFree[c.currentEvents[i].freeRoad] = true
 			if i == len(c.currentEvents) - 1{
 				c.currentEvents = c.currentEvents[:i]
 			}else{
@@ -69,22 +69,22 @@ func (c *Circle) freeRoads() {
 }
 
 func (c *Circle) processInCircle() {
-	fmt.Println("\nprocess===")
-	fmt.Printf("freeRoads = %v\n", c.roadIsFree)
-	fmt.Printf("curentEvents = %v\n\n\n", c.currentEvents)
+	//fmt.Println("\nprocess===")
+	//fmt.Printf("freeRoads = %v\n", c.roadIsFree)
+	//fmt.Printf("curentEvents = %v\n\n\n", c.currentEvents)
 	for i := 0; i < len(c.currentEvents); i++{
-		fmt.Printf("carTime = %v", c.currentEvents[i].addingCar.timePerRoad)
-		//if event.addingCar.prioritet {
+		//fmt.Printf("carTime = %v", c.currentEvents[i].addingCar.timePerRoad)
+		//if  c.currentEvents[i].addingCar.prioritet {
 			if c.roadIsFree[c.currentEvents[i].addingCar.in] {
 				c.roadIsFree[c.currentEvents[i].addingCar.in] = false
 				occurredTime := timeNow + c.currentEvents[i].addingCar.timePerRoad
 
-				event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:true}
-				c.futureEvents = append(c.futureEvents, event)
+				eventFreeRoad := Event{occurredTime:timeNow + c.currentEvents[i].addingCar.timePerRoad, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:true}
+				c.futureEvents = append(c.futureEvents, eventFreeRoad)
 
-				event.addingCar.in = (event.addingCar.in + 1) % roadsNumber
-				if event.addingCar.in != event.addingCar.out{
-					event := Event{occurredTime:occurredTime, freeRoad: event.addingCar.in, typeIsFreeRoad:false, addingCar:event.addingCar}
+				c.currentEvents[i].addingCar.in = (c.currentEvents[i].addingCar.in + 1) % roadsNumber
+				if c.currentEvents[i].addingCar.in != c.currentEvents[i].addingCar.out{
+					event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:false, addingCar:c.currentEvents[i].addingCar}
 					c.futureEvents = append(c.futureEvents, event)
 				}else{
 					CarTerminated++
@@ -103,7 +103,32 @@ func (c *Circle) processInCircle() {
 }
 
 func (c *Circle) processInRoad() {
+	for i := 0; i < len(c.currentEvents); i++{
+		if  !c.currentEvents[i].addingCar.prioritet {
+			if c.roadIsFree[c.currentEvents[i].addingCar.in] {
+				c.roadIsFree[c.currentEvents[i].addingCar.in] = false
+				occurredTime := timeNow + c.currentEvents[i].addingCar.timePerRoad
 
+				eventFreeRoad := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:true}
+				c.futureEvents = append(c.futureEvents, eventFreeRoad)
+
+				c.currentEvents[i].addingCar.in = (c.currentEvents[i].addingCar.in + 1) % roadsNumber
+				if c.currentEvents[i].addingCar.in != c.currentEvents[i].addingCar.out{
+					event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:false, addingCar:c.currentEvents[i].addingCar}
+					c.futureEvents = append(c.futureEvents, event)
+				}else{
+					CarTerminated++
+				}
+
+				if i == len(c.currentEvents) - 1{
+					c.currentEvents = c.currentEvents[:i]
+				}else{
+					c.currentEvents  = append(c.currentEvents [:i], c.currentEvents [i+1:]...)
+				}
+				i--
+			}
+		}
+	}
 }
 
 func NewCircle() Circle{
