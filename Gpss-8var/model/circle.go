@@ -1,125 +1,111 @@
 package model
 
-import "github.com/sirupsen/logrus"
+import (
+	"math"
+	"fmt"
+	"../generator"
+)
 
 var AvgQueue = .0
-
-const roadsNumber = 5
-
-type Circle struct{
-	Roads [roadsNumber][]Car
-	//Circle [roadsNumber + 1][]Car
-}
-
-func(c *Circle) Add(car Car){
-	c.Roads[car.EnterRoad] = append(c.Roads[car.EnterRoad], car)
-}
-
-func(c *Circle) Next(delta DeltaType) {
-	//for i := roadsNumber - 1; i >= 0; i--{
-	//	var roadIsEmpty =  true
-	//	for j := 0; j < len(c.Circle[i]); j++{
-	//		if c.Circle[i][j].Terminate(){
-	//			c.Circle[i] = append(c.Circle[i][:j], c.Circle[i][j+1:]...)
-	//			j--
-	//		}else{
-	//			if c.Circle[i][j].Next(){
-	//				roadIsEmpty = false
-	//				c.Circle[(i+1)%(roadsNumber + 1)] = append(c.Circle[(i+1)%(roadsNumber + 1)], c.Circle[i][j])
-	//				c.Circle[i] = append(c.Circle[i][:j], c.Circle[i][j+1:]...)
-	//				j--
-	//			}
-	//		}
-	//	}
-	//	if roadIsEmpty {
-	//		if len(c.Roads[i]) != 0{
-	//			var car Car
-	//			car, c.Roads[i] = c.Roads[i][0], c.Roads[i][1:]
-	//			c.Circle[(i + 1) % roadsNumber] = append(c.Circle[(i + 1) % roadsNumber], car)
-	//		}
-	//	}
-	//	if i == 0 {
-	//		for _, car := range c.Circle[roadsNumber] {
-	//			c.Circle[0] = append(c.Circle[0], car)
-	//		}
-	//		c.Circle[roadsNumber] = []Car{}
-	//	}
-	//	AvgQueue += len(c.Roads[i])
-	//}
-	logrus.WithField("ЦТС", c.Roads).Info("ЦТС")
-	logrus.WithField("ЦБС CAR", delta.DeltaCar).Info("ЦБС")
-	logrus.WithField("ЦБС Delta", delta.DeltaTime).Info("ЦБС")
-	timeFixed := false
-	for !timeFixed{
-		timeFixed = true
-		for i, Cars := range c.Roads{
-			j := carNeedToGo(Cars)
-			if j == -1{
-				continue
-			}
-			c.Move(i, j)
-		}
-		for _, Cars := range c.Roads{
-			for _, car := range Cars {
-				if car.TimeFixed < delta.DeltaTime {
-					timeFixed = false
-				}
-			}
-		}
-	}
-	carCount := 0
-	for _, cars := range c.Roads{
-		carCount += len(cars)
-	}
-	AvgQueue += float64(carCount) / delta.DeltaTime
-	c.Add(delta.DeltaCar)
-}
-
 var CarTerminated = 0
 
-func (c *Circle) Move(i, j int) {
-	MoveTime := c.Roads[i][j].TimeForPart
-	for k, _ := range c.Roads[i] {
-		c.Roads[i][k].Move(MoveTime)
-	}
-	car := c.Roads[i][j]
-	if c.Roads[i][j].AllTime > 0 {
-		c.Roads[(i + 1) % roadsNumber] = append(c.Roads[(i + 1) % roadsNumber], car)
-	}else{
-		CarTerminated++
-	}
-	c.Roads[i] = append(c.Roads[i][:j], c.Roads[i][j+1:]...)
+const roadsNumber = 5
+var timeNow = .0
+
+type Circle struct{
+	futureEvents Events
+	currentEvents Events
+	roadIsFree []bool
 }
 
-func carNeedToGo(Cars []Car) int{
-	j := -1
-	minTimeToGo := 10000.0
-	minIndex := -1
-	for i, car := range Cars {
-		if car.TimeToGo < minTimeToGo {
-			minTimeToGo = car.TimeToGo
-			minIndex = i
+func(c *Circle) Add(delta DeltaType){
+	c.futureEvents = append(c.futureEvents, Event{delta.DeltaTime, delta.DeltaCar, 0, false})
+}
+
+var CarGenerated = 1
+
+func(c *Circle) Next() {
+	lastGeneratedTime := generator.ExponensialCarGenerator()
+	deltaType := DeltaType{NewCar(generator.TimeGenerator(), generator.RoadGenerator(), generator.RoadGenerator()), timeNow}
+	c.Add(deltaType)
+	for timeNow < 36.0 {
+		if timeNow >= lastGeneratedTime {
+			lastGeneratedTime += generator.ExponensialCarGenerator()
+			//CarGenerated++
+			//deltaType := DeltaType{NewCar(generator.TimeGenerator(), generator.RoadGenerator(), generator.RoadGenerator()), timeNow}
+			//c.Add(deltaType)
 		}
-		if car.TimeToGo == .0 {
-			if car.Priority {
-				j = i
+		minEvents, minTime := c.futureEvents.getMinTime()
+		if minTime  != math.MaxFloat64{
+			timeNow = minTime
+			c.currentEvents = append(c.currentEvents, minEvents...)
+			c.processCurrentEvents()
+		}
+	}
+	//timer <- struct{}{}
+}
+
+func (c *Circle) processCurrentEvents() {
+	fmt.Printf("timeNow = %v\n", timeNow)
+	fmt.Printf("roadIsFree = %v\n", c.roadIsFree)
+	fmt.Printf("futureEvents = %v\n", c.futureEvents)
+	fmt.Printf("CurrentEvents = %v\n", c.currentEvents)
+	c.freeRoads()
+	c.processInCircle()
+}
+
+func (c *Circle) freeRoads() {
+	for i, event := range c.currentEvents{
+		if event.typeIsFreeRoad{
+			fmt.Printf("free Road %v\n", event.freeRoad)
+			c.roadIsFree[event.freeRoad] = true
+			if i == len(c.currentEvents) - 1{
+				c.currentEvents = c.currentEvents[:i]
 			}else{
-				if j == -1 {
-					j = i
-				}
+				c.currentEvents  = append(c.currentEvents [:i], c.currentEvents [i+1:]...)
 			}
 		}
 	}
-	if j == -1 && minIndex != -1{
-		for i, _ := range Cars{
-			Cars[i].Move(minTimeToGo)
-		}
-		return minIndex
-	}
+}
 
-	return j
+func (c *Circle) processInCircle() {
+	fmt.Println("\nprocess===")
+	fmt.Printf("freeRoads = %v\n", c.roadIsFree)
+	fmt.Printf("curentEvents = %v\n\n\n", c.currentEvents)
+	for i := 0; i < len(c.currentEvents); i++{
+		fmt.Printf("carTime = %v", c.currentEvents[i].addingCar.timePerRoad)
+		//if event.addingCar.prioritet {
+			if c.roadIsFree[c.currentEvents[i].addingCar.in] {
+				c.roadIsFree[c.currentEvents[i].addingCar.in] = false
+				occurredTime := timeNow + c.currentEvents[i].addingCar.timePerRoad
+
+				event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:true}
+				c.futureEvents = append(c.futureEvents, event)
+
+				event.addingCar.in = (event.addingCar.in + 1) % roadsNumber
+				if event.addingCar.in != event.addingCar.out{
+					event := Event{occurredTime:occurredTime, freeRoad: event.addingCar.in, typeIsFreeRoad:false, addingCar:event.addingCar}
+					c.futureEvents = append(c.futureEvents, event)
+				}else{
+					CarTerminated++
+				}
+
+				if i == len(c.currentEvents) - 1{
+					c.currentEvents = c.currentEvents[:i]
+				}else{
+					c.currentEvents  = append(c.currentEvents [:i], c.currentEvents [i+1:]...)
+				}
+				i--
+				//CarTerminated++
+			}
+		//}
+	}
+}
+
+func (c *Circle) processInRoad() {
+
 }
 
 func NewCircle() Circle{
-	return Circle{}
+	return Circle{roadIsFree:[]bool{true, true, true, true, true}}
 }
