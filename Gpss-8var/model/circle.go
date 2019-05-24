@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-var AvgQueue = .0
+var AvgQueue = 0
 var CarTerminated = 0
 
 const roadsNumber = 5
@@ -51,7 +51,7 @@ func (c *Circle) processCurrentEvents() {
 	//fmt.Printf("CurrentEvents = %v\n\n", c.currentEvents)
 	c.freeRoads()
 	c.processInCircle()
-	//c.processInRoad()
+	c.processInRoad()
 }
 
 func (c *Circle) freeRoads() {
@@ -74,7 +74,7 @@ func (c *Circle) processInCircle() {
 	//fmt.Printf("curentEvents = %v\n\n\n", c.currentEvents)
 	for i := 0; i < len(c.currentEvents); i++{
 		//fmt.Printf("carTime = %v", c.currentEvents[i].addingCar.timePerRoad)
-		//if  c.currentEvents[i].addingCar.prioritet {
+		if  c.currentEvents[i].addingCar.prioritet {
 			if c.roadIsFree[c.currentEvents[i].addingCar.in] {
 				c.roadIsFree[c.currentEvents[i].addingCar.in] = false
 				occurredTime := timeNow + c.currentEvents[i].addingCar.timePerRoad
@@ -96,9 +96,8 @@ func (c *Circle) processInCircle() {
 					c.currentEvents  = append(c.currentEvents [:i], c.currentEvents [i+1:]...)
 				}
 				i--
-				//CarTerminated++
 			}
-		//}
+		}
 	}
 }
 
@@ -129,8 +128,21 @@ func (c *Circle) processInRoad() {
 			}
 		}
 	}
+	c.countQuue()
 }
 
 func NewCircle() Circle{
 	return Circle{roadIsFree:[]bool{true, true, true, true, true}}
+}
+
+
+var Iterations = 0
+
+func (c *Circle) countQuue() {
+	queue := len(c.futureEvents) + len(c.currentEvents)
+	if queue > 5 {
+		queue =  queue - 5
+	}
+	AvgQueue += queue
+	Iterations++
 }
