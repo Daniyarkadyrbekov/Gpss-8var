@@ -86,7 +86,6 @@ func (c *Circle) processInCircle() {
 				if c.currentEvents[i].addingCar.in != c.currentEvents[i].addingCar.out{
 					event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:false, addingCar:c.currentEvents[i].addingCar}
 					c.futureEvents = append(c.futureEvents, event)
-				}else{
 					CarTerminated++
 				}
 
@@ -115,7 +114,6 @@ func (c *Circle) processInRoad() {
 				if c.currentEvents[i].addingCar.in != c.currentEvents[i].addingCar.out{
 					event := Event{occurredTime:occurredTime, freeRoad: c.currentEvents[i].addingCar.in, typeIsFreeRoad:false, addingCar:c.currentEvents[i].addingCar}
 					c.futureEvents = append(c.futureEvents, event)
-				}else{
 					CarTerminated++
 				}
 

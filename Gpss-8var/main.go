@@ -14,6 +14,6 @@ func main() {
 
 func outPutResults() {
 	fmt.Println("carGenerated ", model.CarGenerated)
-	fmt.Println("carterminated ", model.CarTerminated * 3)
+	fmt.Println("carterminated ", model.CarTerminated)
 	fmt.Println("carQueue ", model.AvgQueue / model.Iterations)
 }
